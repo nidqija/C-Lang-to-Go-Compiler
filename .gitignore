@@ -1,0 +1,15 @@
+# SSH and Keys (Security)
+ssh_key/
+*.key
+*.pem
+id_ed25519*
+id_rsa*
+
+# Build outputs and binaries
+*.exe
+*.o
+*.obj
+output/
+
+# VS Code and environment
+.vscode/
