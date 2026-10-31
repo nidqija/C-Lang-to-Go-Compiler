@@ -116,9 +116,97 @@ Token lexer_next(Lexer *lexer){
         return make_token(lexer , TOKEN_INT_LIT , start_offset , start_line , start_col);
     }
 
+    // check if the current character is a letter or an underscore, which indicates the start of an identifier or a keyword
     if(isalpha((unsigned char)c) || c == '_'){
-        // TBA
+
+        // loop through the source code until we reach a character that is not a letter, digit, or underscore
+        while(isalnum((unsigned char)peek(lexer)) || peek(lexer) == '_'){
+
+            // if the current character is a letter, digit, or underscore, advance the cursor to the next character
+            advance(lexer);
+        }
+        
+
+        // calculate the length of the identifier or keyword by subtracting the start offset from the current cursor position
+        size_t length = lexer->cursor - start_offset;
+
+        // get a ponter to the start of the identifier or keyword in the source code
+        // this is important because we need to compare the identifier or keyword to 
+        // the list of keywords in the language to determine its token type
+        // we will parse the token type of the identifier or keyword by comparing it to the list of keywords in the language,
+        // and if it matches a keyword, we will return the corresponding token type.
+        const char *identifier = &lexer->source[start_offset];
+
+
+
+        // if the length of the identifier is 3 and the identifier is "int", return a token of type TOKEN_INT_KW
+        if(length == 3 && strncmp(identifier, "int" , 3) == 0){
+            return make_token(lexer , TOKEN_INT_KW , start_offset , start_line , start_col);
+        }
+
+        // if the length of the identifier is 4 and the identifier is "void", return a token of type TOKEN_VOID_KW
+        if(length == 4 && strncmp(identifier, "void" , 4) == 0){
+            return make_token(lexer , TOKEN_VOID_KW , start_offset , start_line , start_col);
+        }
+
+        // if the length of the identifier is 6 and the identifier is "return", return a token of type TOKEN_RETURN_KW
+        if (length == 6 && strncmp(identifier, "return" , 6) == 0){
+            return make_token(lexer , TOKEN_RETURN_KW , start_offset , start_line , start_col);
+        }
+
+        // if the identifier does not match any of the keywords, return a token of type TOKEN_IDENT
+        return make_token(lexer , TOKEN_IDENT , start_offset , start_line , start_col);
+
+        
     }
 
-
+   
 }
+
+ const char* token_type_name(TokenType type){
+
+
+        switch(type){
+            case TOKEN_EOF:
+                return "EOF";
+
+            case TOKEN_INT_KW:
+                return "KEYWORD(int)";
+
+            case TOKEN_RETURN_KW:
+                return "KEYWORD(return)";
+
+            case TOKEN_VOID_KW:
+                return "KEYWORD(void)";
+
+            case TOKEN_IDENT:
+                return "IDENTIFIER";
+
+            case TOKEN_INT_LIT:
+                return "INTEGER_LITERAL";
+
+            case TOKEN_LPAREN:
+                return "LPAREN";
+            
+            case TOKEN_RPAREN:
+                return "RPAREN";
+
+            case TOKEN_RBRACE:
+                return "RBRACE";
+
+            case TOKEN_LBRACE:
+                return "LBRACE";
+
+            case TOKEN_SEMICOLON:
+                return "SEMICOLON";
+
+            default:
+                return "UNKNOWN";
+
+            
+
+            
+        }
+        
+
+    }
