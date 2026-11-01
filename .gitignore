@@ -13,3 +13,4 @@ output/
 
 # VS Code and environment
 .vscode/
+.agents/
