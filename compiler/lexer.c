@@ -1,5 +1,7 @@
 #include <stdio.h>
-#include "lexer.h"
+#include "../include/lexer.h"
+#include <ctype.h>
+#include <string.h>
 
 
 // function to initialize the lexer with the source code
@@ -46,15 +48,18 @@ static char advance(Lexer *lexer){
     } else {
         // if the current character is not a newline, increment the column number
         lexer->col++;
+        
     }
+
+    return c;
 }
 
 static void skip_whitespace_and_comments(Lexer *lexer){
     while(1){
         char c = peek(lexer);
-        if (c == ' ' || c == "\t" || c == "\r" || c == "\n"){
+        if (c == ' ' || c == '\t' || c == '\r' || c == '\n' ){
             advance(lexer);
-        } else if (c == "/" && lexer->source[lexer->cursor + 1] == '/') {
+        } else if (c == '/' && lexer->source[lexer->cursor + 1] == '/') {
             while(peek(lexer) != '\0' && peek(lexer) != '\n'){
                 advance(lexer);
             }
@@ -86,7 +91,7 @@ Token lexer_next(Lexer *lexer){
     size_t start_offset = lexer->cursor;
     char c = advance(lexer);
 
-    if( c == "\0"){
+    if( c == '\0'){
         lexer->cursor--;
         return make_token(lexer , TOKEN_EOF , start_offset , start_line , start_col);
     }
@@ -160,6 +165,8 @@ Token lexer_next(Lexer *lexer){
         
     }
 
+    return make_token(lexer, TOKEN_UNKNOWN , start_offset, start_line , start_col);
+
    
 }
 
@@ -209,4 +216,9 @@ Token lexer_next(Lexer *lexer){
         }
         
 
+    }
+
+
+    void lexer_free(Lexer *lexer){
+        (void)lexer;
     }
