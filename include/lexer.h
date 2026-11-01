@@ -1,5 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
+#include <stddef.h> // we need this library to put size_t
+
 
 
 // enum to flag different types of tokens
@@ -14,7 +16,8 @@ typedef enum {
     TOKEN_RPAREN,       // )
     TOKEN_LBRACE,       // {
     TOKEN_RBRACE,       // }
-    TOKEN_SEMICOLON     // ;
+    TOKEN_SEMICOLON  ,   // ;
+    TOKEN_UNKNOWN
 } TokenType;
 
 // struct for token
@@ -45,10 +48,8 @@ Token lexer_next(Lexer *lexer);
 // function to free the lexer session
 void lexer_free(Lexer *lexer);
 
-
-
-
-
+// function to get string representation of token type
+const char* token_type_name(TokenType type);
 
 
 #endif
