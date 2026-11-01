@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "../include/arena.h"
+#include <stdlib.h>
 
 
 // create a new arena with the given capacity 
@@ -28,7 +29,7 @@ void* arena_alloc(Arena* arena , size_t size){
     // return NULL
     // this prevents buffer overflow and prevent the program to crash
     if(arena->offset + aligned_size > arena->capacity){
-        return NULL
+        return NULL;
     }
 
 
