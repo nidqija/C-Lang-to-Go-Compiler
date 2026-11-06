@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
+// function to move to the next token that is being parsed by the lexer
 static void advance_token(Parser *parser){
     parser->current = lexer_next(parser->lexer);
 }
@@ -17,9 +17,10 @@ static void advance_token(Parser *parser){
     return 0;
 } */
 
-
+// function to verify the current token matches type , advances if matched , or reports a syntax error and aborts
 static void expect(Parser *parser , TokenType type , const char *err_msg){
 
+    // if the parsed token does not match with the expected type , output a syntax error indicating a type mismatch
     if(parser->current.tokenType != type){
         fprintf(stderr, "Syntax Error [%d:%d]: %s (got %s)\n",
                 parser->current.line,
@@ -29,10 +30,13 @@ static void expect(Parser *parser , TokenType type , const char *err_msg){
         exit(EXIT_FAILURE);
     }
 
+    // if it matches , advance to the next tokenized syntax
     advance_token(parser);
 
 }
 
+
+// function to init the parser wiht lexer and arena reference , and primes the first token
 void parser_init(Parser *parser , Lexer *lexer , Arena *arena){
     parser->lexer = lexer;
     parser->arena = arena;
@@ -40,6 +44,7 @@ void parser_init(Parser *parser , Lexer *lexer , Arena *arena){
 }
 
 
+// function to parse each expression from the code that is being tokenized
 static ASTNode *parse_expression(Parser *parser){
     if(parser->current.tokenType == TOKEN_INT_LIT){
         ASTNode *node = (ASTNode *)arena_alloc(parser->arena , sizeof(ASTNode));
@@ -54,7 +59,7 @@ static ASTNode *parse_expression(Parser *parser){
     exit(EXIT_FAILURE);
 }
 
-
+// function to parse the statement and returns statement AST Node
 static ASTNode *parse_statement(Parser *parser){
     if(parser->current.tokenType == TOKEN_RETURN_KW){
         advance_token(parser);
@@ -74,8 +79,9 @@ static ASTNode *parse_statement(Parser *parser){
 }
 
 
-
+// function to parse an entire c function declaration and returns the root AST node
 ASTNode *parser_parse_translation_unit(Parser *parser){
+
     expect(parser , TOKEN_INT_KW , "expected return type 'int");
 
     Token name_token = parser->current;

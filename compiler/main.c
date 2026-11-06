@@ -90,15 +90,18 @@ int main(int argc , char **argv){
     printf("Tokenizing source code...\n");
 
    
+    // init the arena for memory allocation by defaulting the value of 4mb memory
     Arena arena = arena_create(4 * 1024 * 1024);
 
+    // init the lexer instance to parse the lexer from the source code
     Lexer lexer;
     lexer_init(&lexer , source);
 
+    // init the parser instance to start parsing the syntax
     Parser parser;
     parser_init(&parser , &lexer , &arena);
 
-    printf("Parsing %s...\n", argv[1]);
+    printf("Parsing %s...\n", argv[1]); 
     ASTNode *root = parser_parse_translation_unit(&parser);
 
 
