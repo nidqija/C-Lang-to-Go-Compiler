@@ -40,7 +40,7 @@ void ast_print(const ASTNode *node , int indent){
         // recursively print its returned expression
         case NODE_RETURN_STMT:
            print_indent(indent);
-           print("[Stmt: Return]\n");
+           printf("[Stmt: Return]\n");
            ast_print(node->return_stmt.expr, indent + 1);
            break;
 
@@ -52,7 +52,7 @@ void ast_print(const ASTNode *node , int indent){
            printf("[Decl: Function] name='%.*s' body_statements=%zu\n",
            (int)node->func_decl.name_len,
            node->func_decl.name,
-           node->func_decl.body_count;
+           node->func_decl.body_count);
 
            // loop through each body statement and recursively print the ast node
            for(size_t i = 0; i < node->func_decl.body_count ; i ++){
@@ -61,6 +61,6 @@ void ast_print(const ASTNode *node , int indent){
              ast_print(node->func_decl.body[i], indent + 2);
            }
            break;
-        )
+        
     }
 }
