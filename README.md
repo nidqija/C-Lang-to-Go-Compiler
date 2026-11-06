@@ -94,17 +94,18 @@ Generated Go Source (.go)
 ```text
 c2go/
 ├── compiler/           # Compiler implementation (C sources)
-│   ├── main.c          # Compiler entry point & CLI
-│   ├── arena.c         # Memory arena implementation
-│   ├── lexer.c         # Lexical analyzer (planned)
-│   ├── parser.c        # Syntax analyzer & AST builder (planned)
+│   ├── main.c          # Compiler entry point & CLI driver (implemented)
+│   ├── arena.c         # Memory arena implementation (implemented)
+│   ├── lexer.c         # Lexical analyzer & tokenizer (implemented)
+│   ├── ast.c           # AST printer and formatting (implemented)
+│   ├── parser.c        # Recursive descent parser (implemented)
 │   ├── sema.c          # Semantic analyzer & type checker (planned)
 │   └── codegen.c       # Go code generator (planned)
 ├── include/            # Header files
-│   ├── arena.h         # Arena allocator interfaces
-│   ├── lexer.h         # Token definitions & lexer API
-│   ├── parser.h        # Parser API (planned)
-│   ├── ast.h           # AST structure definitions (planned)
+│   ├── arena.h         # Arena allocator interfaces (implemented)
+│   ├── lexer.h         # Token definitions & lexer API (implemented)
+│   ├── ast.h           # AST structure definitions (implemented)
+│   ├── parser.h        # Parser API (implemented)
 │   └── codegen.h       # Code generator API (planned)
 ├── examples/           # C input programs to translate
 │   └── hello.c         # Target test programs
@@ -140,14 +141,15 @@ We prioritize **correctness over breadth**. Unsupported constructs will produce 
 ## 📍 Implementation Roadmap
 
 - **Milestone 1: Minimal Proof of Concept**
-  - Accept `int main(void) { return 42; }` and generate a working Go program that compiles and exits cleanly.
-- **Milestone 2: Lexer & Tokenizer**
-  - Robust tokenization, keywords (`int`, `return`, `void`), identifiers, literals, operators, comments, and line/column diagnostics.
-- **Milestone 3: Recursive Descent Parser & AST**
-  - Parse functions, parameters, variable declarations, and arithmetic expressions with operator precedence.
-- **Milestone 4: Semantic Analysis**
+  - Accept `int main(void) { return 42; }` and generate a working Go program that compiles and exits cleanly. *(In Progress)*
+- **Milestone 2: Lexer & Tokenizer** `[Completed]`
+  - Robust tokenization, keywords (`int`, `return`, `void`), identifiers, literals, operators, single-line comments, and line/column diagnostics.
+- **Milestone 3: Recursive Descent Parser & AST** `[In Progress]`
+  - Implemented basic function declarations (`int main(void)`), return statements, and integer literals with AST printing.
+  - Next: arithmetic expressions (`+`, `-`, `*`, `/`) with operator precedence, variable declarations.
+- **Milestone 4: Semantic Analysis** `[Planned]`
   - Symbol tables, scope checking, type validation, and reporting undeclared identifiers.
-- **Milestone 5: Go Code Generation**
+- **Milestone 5: Go Code Generation** `[Next Up]`
   - Emit idiomatic Go code; handle entry-point semantics (`cMain()` vs Go `main()`).
 - **Milestone 6: Control Flow & Scope Expansion**
   - Add `if/else`, loops, nested scopes, and multiple functions.
@@ -178,16 +180,18 @@ git --version
 
 ### 1. Build the C2Go Compiler
 ```powershell
-gcc -Wall -Wextra -g3 -Iinclude compiler/main.c compiler/arena.c -o compiler.exe
+gcc -Wall -Wextra -std=c11 -Iinclude compiler/main.c compiler/arena.c compiler/lexer.c compiler/ast.c compiler/parser.c -o c2go.exe
 ```
 
-### 2. Transpile a C Program
+### 2. Parse a C Program & View the AST
 ```powershell
-.\compiler.exe examples\hello.c -o output\main.go
+.\c2go.exe examples\hello.c
 ```
 
-### 3. Build & Run the Generated Go Code
+### 3. Generate & Run Go Code (Target Pipeline)
 ```powershell
+# Once codegen is linked:
+.\c2go.exe examples\hello.c -o output\main.go
 go run output\main.go
 ```
 
