@@ -1,6 +1,7 @@
 #include "../include/arena.h"
 #include "../include/lexer.h"
 #include "../include/parser.h"
+#include "../include/codegen.h"
 #include "../include/ast.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -76,9 +77,12 @@ int main(int argc , char **argv){
         return EXIT_FAILURE;
     }
 
+    const char *input_path = argv[2];
+    const char *output_path = argv[4];
+
     // read the entire contents of the source file into a string
     // this string will be passed to the lexer for tokenization
-    char *source = read_entire_file(argv[1]);
+    char *source = read_entire_file(input_path);
 
     // if the source file could not be read , output an error message and exit the program with status code EXIT_FAILURE
     if(!source){
@@ -105,6 +109,19 @@ int main(int argc , char **argv){
     ASTNode *root = parser_parse_translation_unit(&parser);
 
 
+    FILE *out = fopen(output_path , "w");
+        if(!out){
+            perror("Error creating output file");
+            free(source);
+            arena_free(&arena);
+            return EXIT_FAILURE;
+        }
+
+    codegen_go(root, out);
+    fclose(out);
+    
+
+
     printf("\n--- Abstract Syntax Tree ---\n");
     ast_print(root, 0);
     printf("----------------------------\n");
@@ -112,5 +129,6 @@ int main(int argc , char **argv){
     free(source);
     arena_free(&arena);
 
+    printf("Successfully transpiled &s -> &s\n" , input_path , output_path);
     return EXIT_SUCCESS;
 }
