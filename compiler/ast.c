@@ -44,6 +44,31 @@ void ast_print(const ASTNode *node , int indent){
            ast_print(node->return_stmt.expr, indent + 1);
            break;
 
+        // if the code is a string
+        // print the indent and print the string value and its type
+        case NODE_STRING_LITERAL:
+            print_indent(indent);
+            printf("[Expr: StringLiteral] value=%.*s\n" ,
+               (int)node->string_literal.length, node->string_literal.value
+             );
+             break;
+
+        case NODE_EXPR_STMT:
+             print_indent(indent);
+             printf("[Stmt: Expression]\n");
+             ast_print(node->return_stmt.expr , indent + 1);
+             break;
+
+
+        case NODE_CALL_STMT:
+             print_indent(indent);
+             printf("[Expr: Call] func='%.*s' args=%zu\n",
+                   (int)node->call_expr.name_len, node->call_expr.name, node->call_expr.arg_count);
+             for(size_t i = 0 ; i < node->call_expr.arg_count; i++){
+                ast_print(node->call_expr.args[i] , indent + 1);
+             }
+             break;
+
         // if the code is a function declaration
         // prints the function name and the number of body statements
         

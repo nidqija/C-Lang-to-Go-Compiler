@@ -12,6 +12,7 @@ typedef enum {
     TOKEN_VOID_KW,      // "void"
     TOKEN_IDENT,        // identifiers (e.g., function names)
     TOKEN_INT_LIT,      // numbers (e.g., 42)
+    TOKEN_STRING_LIT,   // for strings such as "Hello World"
     TOKEN_LPAREN,       // (
     TOKEN_RPAREN,       // )
     TOKEN_LBRACE,       // {

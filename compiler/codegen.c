@@ -16,12 +16,42 @@ static void emit_node(const ASTNode *node , FILE *out){
              fprintf(out , "%lld" , (long long)node->int_literal.value);
              break;
 
+        case NODE_STRING_LITERAL:
+            fprintf(out , "%.*s", (int)node->string_literal.length, node->string_literal.value);
+            break;
+
         // if node received is a return statement 
         // emit the go return keyword , its expression value and a newline
         case NODE_RETURN_STMT:
             fprintf(out , "\treturn ");
             emit_node(node->return_stmt.expr, out);
             fprintf(out , "\n");
+            break;
+
+
+        case NODE_EXPR_STMT:
+            fprintf(out , "\t");
+            emit_node(node->return_stmt.expr , out);
+            fprintf(out , "\n");
+            break;
+
+        case NODE_CALL_STMT:
+            if(node->call_expr.name_len == 6 && strncmp(node->call_expr.name, "printf" , 6) == 0){
+                fprintf(out , "fmt.Printf(");
+            } else {
+                fprintf(out, "%.*s(", (int)node->call_expr.name_len, node->call_expr.name);
+
+            }
+
+            for(size_t i = 0 ; i < node->call_expr.arg_count; i++){
+                emit_node(node->call_expr.args[i], out);
+
+                if(i + 1 < node->call_expr.arg_count){
+                    fprintf(out , ", ");
+                }
+            }
+
+            fprintf(out , ")");
             break;
 
 
@@ -38,6 +68,7 @@ static void emit_node(const ASTNode *node , FILE *out){
             // if it is a main function, print the required code coversion to go code 
             if (is_main){
                 fprintf(out , "package main\n\n");
+                fprintf(out , "import \"fmt\"\n");
                 fprintf(out , "import \"os\"\n\n");
                 fprintf(out, "func cMain() int32{\n");
 
