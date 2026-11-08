@@ -1,3 +1,4 @@
-int main(void){
-    return "hello";
+int main() {
+    printf("Hello world\n");
+    return 0;
 }

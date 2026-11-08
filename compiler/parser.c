@@ -54,6 +54,56 @@ static ASTNode *parse_expression(Parser *parser){
         return node;
     }
 
+    // check if parsed token is a string literal
+    if(parser->current.tokenType == TOKEN_STRING_LIT){
+        ASTNode *node = (ASTNode *)arena_alloc(parser->arena, sizeof(ASTNode));
+        node->kind = NODE_STRING_LITERAL;
+        node->string_literal.value = parser->current.start;
+        node->string_literal.length = parser->current.length;
+        advance_token(parser);
+        return node;
+    }
+
+
+    if(parser->current.tokenType == TOKEN_IDENT){
+        Token id_token = parser->current;
+        advance_token(parser);
+
+        if(parser->current.tokenType == TOKEN_LPAREN){
+            advance_token(parser);
+            size_t capacity = 4;
+            size_t arg_count = 0;
+
+            ASTNode **args = (ASTNode **) arena_alloc(parser->arena , sizeof(ASTNode *) * capacity);
+
+            while(parser->current.tokenType != TOKEN_RPAREN && parser->current.tokenType != TOKEN_EOF){
+                if(arg_count >= capacity){
+                    size_t new_capacity = capacity * 2;
+                    ASTNode **new_args = (ASTNode **)arena_alloc(parser->arena , sizeof(ASTNode *) * new_capacity);
+
+                    for (size_t i = 0; i < arg_count ; i++){
+                        new_args[i] = args[i];
+                      }
+                        args = new_args;
+                        capacity = new_capacity;
+                    }
+                    args[arg_count++] = parse_expression(parser);
+                }
+
+                expect(parser, TOKEN_RPAREN, "Expected ')' after function arguments");
+
+                ASTNode *node = (ASTNode *)arena_alloc(parser->arena , sizeof(ASTNode));
+
+                node->kind = NODE_CALL_STMT;
+                node->call_expr.name = id_token.start;
+                node->call_expr.name_len = id_token.length;
+                node->call_expr.args = args;
+                node->call_expr.arg_count = arg_count;
+                return node;
+            
+        }
+    }
+
     fprintf(stderr, "Syntax Error [%d:%d]: Expected expression\n",
             parser->current.line, parser->current.col);
     exit(EXIT_FAILURE);
@@ -72,6 +122,13 @@ static ASTNode *parse_statement(Parser *parser){
         stmt->return_stmt.expr = expr;
         return stmt;
     }
+
+    ASTNode *expr = parse_expression(parser);
+    expect(parser, TOKEN_SEMICOLON , "Expected ';' after statement");
+    ASTNode *stmt = (ASTNode *)arena_alloc(parser->arena, sizeof(ASTNode));
+    stmt->kind = NODE_EXPR_STMT;
+    stmt->return_stmt.expr = expr;
+    return stmt;
 
     fprintf(stderr, "Syntax Error [%d:%d]: Expected statement\n",
             parser->current.line, parser->current.col);

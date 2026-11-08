@@ -63,7 +63,14 @@ static void skip_whitespace_and_comments(Lexer *lexer){
             while(peek(lexer) != '\0' && peek(lexer) != '\n'){
                 advance(lexer);
             }
-        } else {
+            
+        } else if (c == '#'){
+            while(peek(lexer) != '\0' && peek(lexer) != '\n'){
+                advance(lexer);
+            }
+        }
+        
+        else {
             break;
         }
     }
@@ -112,6 +119,25 @@ Token lexer_next(Lexer *lexer){
 
         case ';':
             return make_token(lexer , TOKEN_SEMICOLON , start_offset , start_line , start_col);
+    }
+
+
+    // check if current tokenized lexer has double quote
+    // this is for detecting any strings from the input code
+    if(c == '"'){
+        while(peek(lexer) != '"' && peek(lexer) != '\0'){
+            if(peek(lexer) == '\\'){
+                advance(lexer);
+            }
+
+            advance(lexer);
+        }
+
+        if (peek(lexer) == '"'){
+            advance(lexer);
+        }
+
+        return make_token(lexer , TOKEN_STRING_LIT , start_offset , start_line , start_col);
     }
 
     if(isdigit((unsigned char)c)){
@@ -191,6 +217,9 @@ Token lexer_next(Lexer *lexer){
 
             case TOKEN_INT_LIT:
                 return "INTEGER_LITERAL";
+
+            case TOKEN_STRING_LIT:
+                return "STRING_LITERAL";
 
             case TOKEN_LPAREN:
                 return "LPAREN";
