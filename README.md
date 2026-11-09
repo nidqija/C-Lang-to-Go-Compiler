@@ -30,6 +30,7 @@ The project is built without external parser generators or compiler frameworks (
 - [Implementation Roadmap](#-implementation-roadmap)
 - [Building & Running (Windows & Linux)](#-building--running-windows--linux)
 - [Self-Hosted Homelab & Mobile Control (Tailscale + Termius)](#-self-hosted-homelab--mobile-control-tailscale--termius)
+- [Deployment & Operations Runbook (DEPLOYMENT.md)](DEPLOYMENT.md)
 - [Design Principles](#-design-principles)
 
 ---
