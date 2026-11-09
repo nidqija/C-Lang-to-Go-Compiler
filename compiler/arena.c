@@ -13,7 +13,6 @@ Arena arena_create(size_t capacity ){
 }
 
 
-
 // function to allocate memory from the arena
 // it returns a pointer to the allocated memory
 void* arena_alloc(Arena* arena , size_t size){
