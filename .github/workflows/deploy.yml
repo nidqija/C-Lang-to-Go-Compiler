@@ -1,0 +1,30 @@
+name: Auto Deploy C2Go on Debian
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted  # Executes directly on your Debian machine
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build C2Go Compiler
+        run: |
+          gcc -Wall -Wextra -std=c11 -Iinclude compiler/main.c compiler/arena.c compiler/lexer.c compiler/ast.c compiler/parser.c compiler/codegen.c -o c2go
+          chmod +x c2go
+
+      - name: Verify Transpilation and Execution
+        run: |
+          ./c2go transpile examples/hello.c -o output/main.go
+          go run output/main.go
+
+      - name: Update Global Binary
+        run: |
+          sudo cp c2go /usr/local/bin/c2go
+          echo "🚀 Successfully built and deployed latest c2go to /usr/local/bin/c2go!"
+
