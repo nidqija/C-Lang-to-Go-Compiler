@@ -79,6 +79,7 @@ static void emit_node(const ASTNode *node , FILE *out){
 
                 fprintf(out , "}\n\n");
                 fprintf(out , "func main(){\n");
+                fprint(out , "\t_ = fmt.Printf\n");
                 fprintf(out , "\tos.Exit(int(cMain()))\n");
                 fprintf(out , "}\n");
             } else {
