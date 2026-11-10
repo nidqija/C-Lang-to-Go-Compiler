@@ -86,6 +86,41 @@ void ast_print(const ASTNode *node , int indent){
              ast_print(node->func_decl.body[i], indent + 2);
            }
            break;
+
+
+        case NODE_BINARY_EXPR: {
+           const char *op_str = "?";
+
+           switch(node->binary_expr.op){
+            case TOKEN_PLUS:
+                op_str = "+";
+                break;
+
+            case TOKEN_MINUS:
+                op_str = "-";
+                break;
+
+            case TOKEN_MULTI:
+                op_str = "*";
+                break;
+
+            case TOKEN_DIVIDE:
+                op_str = "/";
+                break;
+
+            default:
+                printf("Default indent , unknown expression\n");
+                break;
+
+           }
+
+           print_indent(indent);
+           printf("[Expr: Binary] op='%s'\n" , op_str);
+           ast_print(node->binary_expr.left , indent + 1);
+           ast_print(node->binary_expr.right , indent + 1);
+           break;
+           
+         }
         
     }
 }

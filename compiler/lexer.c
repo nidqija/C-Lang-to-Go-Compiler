@@ -119,6 +119,21 @@ Token lexer_next(Lexer *lexer){
 
         case ';':
             return make_token(lexer , TOKEN_SEMICOLON , start_offset , start_line , start_col);
+
+        case '+':
+            return make_token(lexer , TOKEN_PLUS , start_offset , start_line , start_col);
+
+        case '-':
+            return make_token(lexer , TOKEN_MINUS, start_offset , start_line , start_col);
+
+        case '*':
+            return make_token(lexer , TOKEN_MULTI , start_offset , start_line , start_col);
+
+        case '/':
+            return make_token(lexer , TOKEN_DIVIDE , start_offset , start_line , start_col);
+            
+
+
     }
 
 
@@ -236,6 +251,19 @@ Token lexer_next(Lexer *lexer){
             case TOKEN_SEMICOLON:
                 return "SEMICOLON";
 
+           case TOKEN_PLUS:
+                return "ADDITION";
+
+            case TOKEN_MINUS:
+                return "SUBSTRACTION";
+
+            case TOKEN_MULTI:
+                return "MULTIPLICATION";
+
+
+            case TOKEN_DIVIDE:
+                return "DIVISION";
+            
             default:
                 return "UNKNOWN";
 
