@@ -18,7 +18,12 @@ typedef enum {
     TOKEN_LBRACE,       // {
     TOKEN_RBRACE,       // }
     TOKEN_SEMICOLON  ,   // ;
-    TOKEN_UNKNOWN
+    TOKEN_PLUS,
+    TOKEN_MINUS,
+    TOKEN_MULTI,
+    TOKEN_DIVIDE,
+    TOKEN_UNKNOWN,
+    
 } TokenType;
 
 // struct for token
