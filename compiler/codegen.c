@@ -95,6 +95,42 @@ static void emit_node(const ASTNode *node , FILE *out){
             break;
             
         }
+
+        // if node received is a binary expression , 
+        // we will generate the expressions in go code by checking the 
+        // left side of the nodes ,
+        //  then to the right according to PEMDAS formulations
+        case NODE_BINARY_EXPR: {
+            emit_node(node->binary_expr.left , out);
+
+            const char *op_str = "?";
+
+            switch(node->binary_expr.op){
+                case TOKEN_PLUS:
+                  op_str = "+";
+                  break;
+
+                case TOKEN_MINUS:
+                  op_str = "-";
+                  break;
+
+                case TOKEN_MULTI:
+                  op_str = "*";
+                  break;
+
+                case TOKEN_DIVIDE:
+                  op_str = "/";
+                  break;
+
+                default:
+                  break;
+            }
+
+            fprintf(out , " %s " , op_str);
+
+            emit_node(node->binary_expr.right , out);
+            break;
+        }
     }
 }
 

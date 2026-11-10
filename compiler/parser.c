@@ -7,16 +7,6 @@ static void advance_token(Parser *parser){
     parser->current = lexer_next(parser->lexer);
 }
 
-
-/*static int match(Parser *parser , TokenType type){
-    if(parser->current.tokenType == type){
-        advance_token(parser);
-        return 1;
-    }
-
-    return 0;
-} */
-
 // function to verify the current token matches type , advances if matched , or reports a syntax error and aborts
 static void expect(Parser *parser , TokenType type , const char *err_msg){
 
@@ -35,17 +25,66 @@ static void expect(Parser *parser , TokenType type , const char *err_msg){
 
 }
 
+// Forward declarations to allow mutual recursion across precedence levels
+static ASTNode *parse_expression(Parser *parser);
+static ASTNode *parse_multi_divide(Parser *parser);
+static ASTNode *parse_primary(Parser *parser);
 
-// function to init the parser wiht lexer and arena reference , and primes the first token
-void parser_init(Parser *parser , Lexer *lexer , Arena *arena){
-    parser->lexer = lexer;
-    parser->arena = arena;
-    advance_token(parser);
+static ASTNode *parse_expression(Parser *parser){
+    ASTNode *left = parse_multi_divide(parser);
+
+
+    while(parser->current.tokenType == TOKEN_PLUS || parser->current.tokenType == TOKEN_MINUS){
+        TokenType op = parser->current.tokenType;
+        advance_token(parser);
+
+        ASTNode *right = parse_multi_divide(parser);
+
+        ASTNode *bin = (ASTNode *)arena_alloc(parser->arena , sizeof(ASTNode));
+        bin->kind = NODE_BINARY_EXPR;
+        bin->binary_expr.op = op;
+        bin->binary_expr.left = left;
+        bin->binary_expr.right = right;
+
+
+        left = bin;
+    }
+
+    return left;
+}
+
+
+
+// function to parse multiplication and division operation , 
+// we put this in another function as this requires more priority 
+// according to PEMDAS rules
+static ASTNode *parse_multi_divide(Parser *parser){
+    ASTNode *left = parse_primary(parser);
+
+
+    while(parser->current.tokenType == TOKEN_MULTI || parser->current.tokenType == TOKEN_DIVIDE){
+        TokenType op = parser->current.tokenType;
+        advance_token(parser);
+
+        ASTNode *right = parse_primary(parser);
+
+        ASTNode *bin = (ASTNode *)arena_alloc(parser->arena , sizeof(ASTNode));
+        bin->kind = NODE_BINARY_EXPR;
+        bin->binary_expr.op = op;
+        bin->binary_expr.left = left;
+        bin->binary_expr.right = right;
+
+        left = bin;
+
+
+    }
+
+    return left;
 }
 
 
 // function to parse each expression from the code that is being tokenized
-static ASTNode *parse_expression(Parser *parser){
+static ASTNode *parse_primary(Parser *parser){
     if(parser->current.tokenType == TOKEN_INT_LIT){
         ASTNode *node = (ASTNode *)arena_alloc(parser->arena , sizeof(ASTNode));
         node->kind = NODE_INT_LITERAL;
@@ -108,6 +147,38 @@ static ASTNode *parse_expression(Parser *parser){
             parser->current.line, parser->current.col);
     exit(EXIT_FAILURE);
 }
+
+
+
+
+
+
+
+
+
+/*static int match(Parser *parser , TokenType type){
+    if(parser->current.tokenType == type){
+        advance_token(parser);
+        return 1;
+    }
+
+    return 0;
+} */
+
+
+
+
+// function to init the parser wiht lexer and arena reference , and primes the first token
+void parser_init(Parser *parser , Lexer *lexer , Arena *arena){
+    parser->lexer = lexer;
+    parser->arena = arena;
+    advance_token(parser);
+}
+
+
+
+
+
 
 // function to parse the statement and returns statement AST Node
 static ASTNode *parse_statement(Parser *parser){
@@ -191,3 +262,6 @@ ASTNode *parser_parse_translation_unit(Parser *parser){
 
 
 }
+
+
+

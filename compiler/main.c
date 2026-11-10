@@ -129,6 +129,6 @@ int main(int argc , char **argv){
     free(source);
     arena_free(&arena);
 
-    printf("Successfully transpiled &s -> &s\n" , input_path , output_path);
+    printf("Successfully transpiled %s -> %s\n" , input_path , output_path);
     return EXIT_SUCCESS;
 }

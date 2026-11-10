@@ -3,6 +3,7 @@
 
 
 #include <stdio.h>
+#include "lexer.h"
 #include <stdint.h>
 
 
@@ -13,7 +14,8 @@ typedef enum {
     NODE_RETURN_STMT,
     NODE_FUNCTION_DECL,
     NODE_EXPR_STMT,
-    NODE_CALL_STMT
+    NODE_CALL_STMT,
+    NODE_BINARY_EXPR
 } NodeKind;
 
 
@@ -44,6 +46,13 @@ struct ASTNode{
             size_t arg_count;
 
         } call_expr;
+
+
+        struct {
+            TokenType op;
+            ASTNode *left;
+            ASTNode *right;
+        } binary_expr;
 
     // struct for detecting return statements
     struct {
