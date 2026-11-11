@@ -132,6 +132,9 @@ static void emit_node(const ASTNode *node , FILE *out){
             emit_node(node->binary_expr.right , out);
             break;
         }
+
+
+        
     }
 }
 
