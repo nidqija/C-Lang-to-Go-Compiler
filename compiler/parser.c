@@ -34,7 +34,7 @@ static ASTNode *parse_expression(Parser *parser){
     ASTNode *left = parse_multi_divide(parser);
 
 
-    while(parser->current.tokenType == TOKEN_PLUS || parser->current.tokenType == TOKEN_MINUS){
+    while(parser->current.tokenType == TOKEN_PLUS || parser->current.tokenType == TOKEN_MINUS || parser->current.tokenType == TOKEN_LT){
         TokenType op = parser->current.tokenType;
         advance_token(parser);
 
@@ -108,6 +108,18 @@ static ASTNode *parse_primary(Parser *parser){
         Token id_token = parser->current;
         advance_token(parser);
 
+
+        if(parser->current.tokenType == TOKEN_INC){
+            advance_token(parser);
+            ASTNode *inc = (ASTNode *)arena_alloc(parser->arena, sizeof(ASTNode));
+            inc->kind = NODE_INC_EXPR;
+            inc->inc_expr.name = id_token.start;
+            inc->inc_expr.name_len = id_token.length;
+            return inc;
+        }
+
+        
+
         if(parser->current.tokenType == TOKEN_LPAREN){
             advance_token(parser);
             size_t capacity = 4;
@@ -141,7 +153,16 @@ static ASTNode *parse_primary(Parser *parser){
                 return node;
             
         }
+
+        ASTNode *var_node = (ASTNode *)arena_alloc(parser->arena, sizeof(ASTNode));
+        var_node->kind = NODE_VAR_REF;
+        var_node->var_ref.name = id_token.start;
+        var_node->var_ref.name_len = id_token.length;
+        return var_node;
     }
+
+
+   
 
     fprintf(stderr, "Syntax Error [%d:%d]: Expected expression\n",
             parser->current.line, parser->current.col);
@@ -192,6 +213,86 @@ static ASTNode *parse_statement(Parser *parser){
         stmt->kind = NODE_RETURN_STMT;
         stmt->return_stmt.expr = expr;
         return stmt;
+    }
+
+    if(parser->current.tokenType == TOKEN_INT_KW){
+        advance_token(parser);
+        Token name_token = parser->current;
+        expect(parser , TOKEN_IDENT , "Expected variable after 'int'");
+
+        expect(parser , TOKEN_ASSIGN , "Expected '=' after variable name");
+
+        ASTNode *init_expr = parse_expression(parser);
+
+        expect(parser , TOKEN_SEMICOLON, "Expected ';' after variable declaration");
+
+        ASTNode *node = (ASTNode *)arena_alloc(parser->arena , sizeof(ASTNode));
+        node->kind = NODE_VAR_DECL;
+        node->var_decl.name = name_token.start;
+        node->var_decl.name_len = name_token.length;
+        node->var_decl.init = init_expr;
+        return node;
+    }
+
+
+     // check if parser detect the current token type is a for statement
+    if(parser->current.tokenType == TOKEN_FOR_KW){
+
+        // advance to next token to analyze syntax in the for loop
+        advance_token(parser);
+        expect(parser, TOKEN_LPAREN , "Expected '(' after 'for'");
+        ASTNode *init = parse_statement(parser);
+        
+
+        ASTNode *cond = parse_expression(parser);
+        expect(parser , TOKEN_SEMICOLON, "Expected ';' after for clauses");
+
+        ASTNode *post = parse_expression(parser);
+
+        expect(parser, TOKEN_RPAREN , "Expected ')' after for clauses");
+
+        expect(parser ,TOKEN_LBRACE , "Expected '{' to start loop body");
+
+
+        size_t capacity = 4;
+        size_t count = 0;
+
+
+
+
+        ASTNode **body = (ASTNode **)arena_alloc(parser->arena, sizeof(ASTNode *) * capacity);
+
+        while(parser->current.tokenType != TOKEN_RBRACE && parser->current.tokenType != TOKEN_EOF){
+            if(count >= capacity ){
+                size_t new_capacity = capacity * 2;
+
+                ASTNode **new_body = (ASTNode **) arena_alloc(parser->arena , sizeof(ASTNode *) * new_capacity);
+
+                for(size_t i = 0 ; i < count; i++){
+                    new_body[i] = body[i];
+                }
+
+                body = new_body;
+                capacity = new_capacity;
+            }
+
+            body[count++] = parse_statement(parser);
+        }
+
+        expect(parser , TOKEN_RBRACE , "Expected '}' to close loop body");
+
+
+        ASTNode *node = (ASTNode *)arena_alloc(parser->arena , sizeof(ASTNode));
+        node->kind = NODE_FOR_STMT;
+        node->for_stmt.init = init;
+        node->for_stmt.cond = cond;
+        node->for_stmt.post = post;
+        node->for_stmt.body = body;
+        node->for_stmt.body_count = count;
+
+        return node;
+
+        
     }
 
     ASTNode *expr = parse_expression(parser);

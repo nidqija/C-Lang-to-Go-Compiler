@@ -121,6 +121,11 @@ Token lexer_next(Lexer *lexer){
             return make_token(lexer , TOKEN_SEMICOLON , start_offset , start_line , start_col);
 
         case '+':
+            if(peek(lexer) == '+'){
+                advance(lexer);
+                return make_token(lexer , TOKEN_INC , start_offset , start_line , start_col);
+
+            }
             return make_token(lexer , TOKEN_PLUS , start_offset , start_line , start_col);
 
         case '-':
@@ -131,6 +136,12 @@ Token lexer_next(Lexer *lexer){
 
         case '/':
             return make_token(lexer , TOKEN_DIVIDE , start_offset , start_line , start_col);
+
+        case '=':
+            return make_token(lexer , TOKEN_ASSIGN , start_offset , start_line , start_col);
+
+        case '<':
+            return make_token(lexer , TOKEN_LT , start_offset , start_line , start_col);
             
 
 
@@ -188,6 +199,11 @@ Token lexer_next(Lexer *lexer){
         // if the length of the identifier is 3 and the identifier is "int", return a token of type TOKEN_INT_KW
         if(length == 3 && strncmp(identifier, "int" , 3) == 0){
             return make_token(lexer , TOKEN_INT_KW , start_offset , start_line , start_col);
+        }
+
+        
+        if(length == 3 && strncmp(identifier, "for" , 3) == 0){
+            return make_token(lexer ,TOKEN_FOR_KW , start_offset ,start_line , start_col);
         }
 
         // if the length of the identifier is 4 and the identifier is "void", return a token of type TOKEN_VOID_KW
@@ -263,6 +279,18 @@ Token lexer_next(Lexer *lexer){
 
             case TOKEN_DIVIDE:
                 return "DIVISION";
+
+            case TOKEN_FOR_KW:
+                return "KEYWORD(for)";
+
+            case TOKEN_ASSIGN:
+                return "ASSIGN";
+
+            case TOKEN_LT:
+                return "LESS THAN";
+
+            case TOKEN_INC:
+                return "INCREMENT(+)";
             
             default:
                 return "UNKNOWN";
