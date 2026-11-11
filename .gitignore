@@ -4,6 +4,7 @@ ssh_key/
 *.pem
 id_ed25519*
 id_rsa*
+node_modules/
 
 # Build outputs and binaries
 *.exe
@@ -15,3 +16,11 @@ output/
 .vscode/
 .agents/
 test_deploy.ps1
+
+# Web Frontend (SvelteKit)
+web/node_modules/
+web/.svelte-kit/
+web/build/
+web/.env*
+!web/.env.example
+
