@@ -22,7 +22,12 @@ typedef enum {
     TOKEN_MINUS,
     TOKEN_MULTI,
     TOKEN_DIVIDE,
+    TOKEN_FOR_KW,
+    TOKEN_ASSIGN,
+    TOKEN_LT,
+    TOKEN_INC,
     TOKEN_UNKNOWN,
+  
     
 } TokenType;
 

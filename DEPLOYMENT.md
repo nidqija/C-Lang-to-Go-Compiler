@@ -54,6 +54,8 @@ nohup bash -c 'while true; do ~/c2go/auto_deploy.sh; sleep 20; done' > ~/c2go/au
 pkill -f auto_deploy.sh
 ```
 
+
+
 ### Restart the Worker
 ```bash
 pkill -f auto_deploy.sh

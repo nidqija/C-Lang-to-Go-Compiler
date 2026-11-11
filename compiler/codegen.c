@@ -54,6 +54,57 @@ static void emit_node(const ASTNode *node , FILE *out){
             fprintf(out , ")");
             break;
 
+        case NODE_VAR_REF:
+            fprintf(out, "%.*s", (int)node->var_ref.name_len, node->var_ref.name);
+            break;
+
+        case NODE_INC_EXPR:
+            fprintf(out, "%.*s++", (int)node->inc_expr.name_len, node->inc_expr.name);
+            break;
+
+        case NODE_VAR_DECL:
+            fprintf(out, "\tvar %.*s int32 = ", (int)node->var_decl.name_len, node->var_decl.name);
+            emit_node(node->var_decl.init , out);
+            fprintf(out , "\n");
+            break;
+
+        case NODE_FOR_STMT:
+            fprintf(out , "\tfor ");
+
+            if(node->for_stmt.init){
+                if(node->for_stmt.init->kind == NODE_VAR_DECL){
+                    fprintf(out , "%.*s := int32(",
+                    (int)node->for_stmt.init->var_decl.name_len,
+                    node->for_stmt.init->var_decl.name
+                    );
+                    emit_node(node->for_stmt.init->var_decl.init , out);
+                    fprintf(out , ")");
+                } else {
+                    emit_node(node->for_stmt.cond, out);
+                }
+            }
+            fprintf(out , "; ");
+
+            if(node->for_stmt.cond){
+                emit_node(node->for_stmt.cond , out);
+            }
+
+            fprintf(out , "; ");
+
+            if(node->for_stmt.post){
+                emit_node(node->for_stmt.post , out);
+            }
+
+            fprintf(out , "{\n");
+
+            for(size_t i = 0 ; i < node->for_stmt.body_count; i++){
+                emit_node(node->for_stmt.body[i], out);
+            }
+
+            fprintf(out, "\t}\n");
+            break;
+
+
 
         // if node received is function declaration , 
         // check if node is a main function or just a helper function
@@ -123,6 +174,14 @@ static void emit_node(const ASTNode *node , FILE *out){
                   op_str = "/";
                   break;
 
+
+                case TOKEN_LT:
+                   op_str = "<";
+                   break;
+
+
+                    
+
                 default:
                   break;
             }
@@ -132,6 +191,9 @@ static void emit_node(const ASTNode *node , FILE *out){
             emit_node(node->binary_expr.right , out);
             break;
         }
+
+
+        
     }
 }
 

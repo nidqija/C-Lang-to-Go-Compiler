@@ -14,3 +14,4 @@ output/
 # VS Code and environment
 .vscode/
 .agents/
+test_deploy.ps1

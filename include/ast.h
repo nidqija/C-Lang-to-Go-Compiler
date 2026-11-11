@@ -15,7 +15,11 @@ typedef enum {
     NODE_FUNCTION_DECL,
     NODE_EXPR_STMT,
     NODE_CALL_STMT,
-    NODE_BINARY_EXPR
+    NODE_BINARY_EXPR,
+    NODE_FOR_STMT,
+    NODE_VAR_DECL,
+    NODE_VAR_REF,
+    NODE_INC_EXPR
 } NodeKind;
 
 
@@ -46,6 +50,35 @@ struct ASTNode{
             size_t arg_count;
 
         } call_expr;
+
+
+        struct {
+            ASTNode *init;
+            ASTNode *cond;
+            ASTNode *post;
+            ASTNode **body;
+            size_t body_count;
+        } for_stmt;
+
+        struct{
+            const char *name;
+            size_t name_len;
+        } inc_expr;
+
+        struct {
+            const char *name;
+            size_t name_len;
+            ASTNode *init;
+
+        } var_decl;
+
+
+        struct {
+            const char *name;
+            size_t name_len;
+
+        } var_ref;
+
 
 
         struct {
