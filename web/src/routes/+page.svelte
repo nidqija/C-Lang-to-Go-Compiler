@@ -44,6 +44,14 @@
                 body : JSON.stringify({code : cCode})
             });
 
+            const data = await res.json();
+
+            ast = data.ast;
+            goCode = data.go_code;
+            output = data.output;
+            exitCode = data.exit_code;
+            activeTab = "output";
+
 
         } catch (err : any){
             output = "Network Error: " + err.message;
