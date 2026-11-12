@@ -31,6 +31,8 @@ type RunResponse struct {
 
 // main function to handle http requests of users and the web wrapper
 func handleRun(w http.ResponseWriter , r *http.Request){
+
+	// defint CORS policy to talk between client server module in web http server
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
@@ -132,12 +134,13 @@ func handleRun(w http.ResponseWriter , r *http.Request){
 }
 
 
+// helper function to wrap the response in a json format to be sent to the server
 func jsonResponse(w http.ResponseWriter , resp RunResponse){
 	w.Header().Set("Content-Type" , "application/json")
 	json.NewEncoder(w).Encode(resp)
 }
 
-
+// function to extract the AST from the input code by user
 func extractAST(output string) string {
 	start := strings.Index(output , "---- Abstract Syntax Tree ---")
 
@@ -156,6 +159,7 @@ func extractAST(output string) string {
 }
 
 
+// main function that serves as a router and to run multiple functions 
 func main(){
 	port := "8080"
 
