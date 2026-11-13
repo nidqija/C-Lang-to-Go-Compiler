@@ -139,6 +139,11 @@ static ASTNode *parse_primary(Parser *parser){
                         capacity = new_capacity;
                     }
                     args[arg_count++] = parse_expression(parser);
+
+                    
+                    if(parser->current.tokenType == TOKEN_COMMA){
+                        advance_token(parser);
+                    }
                 }
 
                 expect(parser, TOKEN_RPAREN, "Expected ')' after function arguments");
@@ -318,9 +323,60 @@ ASTNode *parser_parse_translation_unit(Parser *parser){
 
     expect(parser , TOKEN_LPAREN , "Expected '(' after function name");
 
+
+    size_t param_capacity = 4;
+    size_t param_count = 0;
+
+    ASTNode **params = (ASTNode **)arena_alloc(parser->arena , sizeof(ASTNode *) * param_capacity);
+
+
+
+
     if(parser->current.tokenType == TOKEN_VOID_KW){
         advance_token(parser);
+    } else {
+
+        // parse all params in a function to analyze and make symbol tables of each syntax to be parsed to code gen
+        while(parser->current.tokenType != TOKEN_RPAREN && parser->current.tokenType != TOKEN_EOF){
+            expect(parser , TOKEN_INT_KW , "Expected parameter type 'int'");
+
+
+            Token param_name = parser->current;
+            expect(parser , TOKEN_IDENT , "Expected parameter name");
+       
+
+        
+        ASTNode *param_node = (ASTNode *)arena_alloc(parser->arena, sizeof(ASTNode));
+        param_node->kind = NODE_VAR_DECL;
+        param_node->var_decl.name = param_name.start;
+        param_node->var_decl.name_len = param_name.length;
+        param_node->var_decl.init = NULL;
+
+        if(param_count >= param_capacity){
+            size_t new_cap = param_capacity * 2;
+            ASTNode **new_params = (ASTNode **)arena_alloc(parser->arena , sizeof(ASTNode *) * new_cap);
+
+            for(size_t i = 0 ; i < param_count ; i ++){
+                new_params[i] = params[i];
+            }
+
+            params = new_params;
+            param_capacity = new_cap;
+        }
+
+        params[param_count++] = param_node;
+
+
+        if (parser->current.tokenType == TOKEN_COMMA){
+            advance_token(parser);
+        } else {
+            break;
+        }
     }
+}
+
+
+    
 
     expect(parser , TOKEN_RPAREN , "Expected ')' after parameter list");
 
@@ -355,6 +411,8 @@ ASTNode *parser_parse_translation_unit(Parser *parser){
     func->kind = NODE_FUNCTION_DECL;
     func->func_decl.name = name_token.start;
     func->func_decl.name_len = name_token.length;
+    func->func_decl.params = params;
+    func->func_decl.param_count = param_count;
     func->func_decl.body = statements;
     func->func_decl.body_count = count;
 
