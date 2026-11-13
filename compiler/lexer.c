@@ -142,6 +142,9 @@ Token lexer_next(Lexer *lexer){
 
         case '<':
             return make_token(lexer , TOKEN_LT , start_offset , start_line , start_col);
+
+        case ',':
+            return make_token(lexer , TOKEN_COMMA , start_offset , start_line , start_col);
             
 
 
@@ -291,6 +294,9 @@ Token lexer_next(Lexer *lexer){
 
             case TOKEN_INC:
                 return "INCREMENT(+)";
+
+            case TOKEN_COMMA:
+                return "COMMA(,)";
             
             default:
                 return "UNKNOWN";

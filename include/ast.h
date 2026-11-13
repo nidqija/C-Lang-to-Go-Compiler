@@ -80,6 +80,9 @@ struct ASTNode{
         } var_ref;
 
 
+       
+
+
 
         struct {
             TokenType op;
@@ -97,6 +100,8 @@ struct ASTNode{
     struct {
         const char *name;
         size_t name_len;
+        ASTNode **params;
+        size_t param_count;
         ASTNode **body;
         size_t body_count;
     } func_decl;
