@@ -1,4 +1,8 @@
 <script lang="ts">
+
+
+	// default state of code on restart
+	// displayed to the ui by default
     let cCode = $state(`int main() {
     printf("Hello from C2Go!\\n");
 
@@ -9,6 +13,7 @@
     return 0;
 }`);
 
+	// state management for each variables and active tabs
     let ast = $state("");
     let goCode = $state("");
     let output = $state("");
@@ -16,6 +21,8 @@
     let loading = $state(false);
     let activeTab = $state<"output" | "ast" | "go">("output");
 
+
+	// preset code templates according to types
     function loadPreset(type: string) {
         if (type == "loop") {
             cCode = `int main() {\n    for (int i = 0; i < 4; i++) {\n        printf("Iteration %d\\n", i);\n    }\n    return 0;\n}`;
@@ -26,10 +33,12 @@
         }
     }
 
+	// async function run the compiler by calling the api from go server
     async function runCompiler() {
         loading = true;
         output = "Transpiling and executing the code...";
 
+		// try catch to fetch the api 
         try {
             const res = await fetch("/api/run", {
                 method: "POST",
@@ -37,16 +46,22 @@
                 body: JSON.stringify({ code: cCode })
             });
 
+			// awaiting data being retrieved from response in json format
             const data = await res.json();
 
+
+			// destructure the json payload to respective variables
             ast = data.ast || "";
             goCode = data.go_code || "";
             output = data.output || (data.error ? "Error: " + data.error : "");
             exitCode = data.exit_code ?? null;
             activeTab = "output";
+
+			// if network issue , catch block is activated
         } catch (err: any) {
             output = "Network Error: " + err.message;
         } finally {
+			
             loading = false;
         }
     }
