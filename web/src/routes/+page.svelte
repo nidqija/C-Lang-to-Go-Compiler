@@ -1,5 +1,9 @@
+
+
 <script lang="ts">
 
+	import {fileStore , handleImportFiles } from "./filesHandler.svelte.ts"
+	
 
 	// default state of code on restart
 	// displayed to the ui by default
@@ -12,6 +16,8 @@
 
     return 0;
 }`);
+
+	
 
 	// state management for each variables and active tabs
     let ast = $state("");
@@ -107,6 +113,30 @@
 				<span>C Source (Input)</span>
 				<span class="text-[10px] text-gray-500">Editable</span>
 			</div>
+			<!-- File Tabs Header -->
+			<div class="flex items-center gap-1 border-b border-[#333] bg-[#252526] px-2 py-1 overflow-x-auto">
+				{#each fileStore.files as file, index}
+					<button
+						onclick={() => fileStore.activeFileIndex = index}
+						class="flex items-center gap-2 rounded px-3 py-1 text-xs font-medium transition {fileStore.activeFileIndex === index ? 'bg-[#1e1e1e] text-white border-b-2 border-emerald-500' : 'text-gray-400 hover:text-gray-200'}"
+					>
+						<span>📄 {file.name}</span>
+					</button>
+				{/each}
+
+				<!-- Hidden file input + Import Button -->
+				<label class="ml-auto flex items-center gap-1 cursor-pointer rounded bg-[#333] px-2.5 py-1 text-xs hover:bg-[#444] text-gray-300">
+					<span>📂 Import Files</span>
+					<input type="file" multiple accept=".c,.h" onchange={handleImportFiles} class="hidden" />
+				</label>
+			</div>
+
+			<!-- Active File Textarea -->
+			<textarea
+				bind:value={fileStore.files[fileStore.activeFileIndex].content}
+				class="flex-1 resize-none bg-[#1e1e1e] p-3 font-mono text-sm text-gray-100 outline-none"
+				spellcheck="false"
+			></textarea>
 			<textarea
 				bind:value={cCode}
 				class="flex-1 resize-none bg-[#1e1e1e] p-3 font-mono text-base md:text-sm leading-relaxed text-gray-100 outline-none"
