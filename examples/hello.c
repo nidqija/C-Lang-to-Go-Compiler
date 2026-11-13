@@ -1,11 +1,14 @@
+#include "math.h"
+#include <stdio.h>
+
 int main() {
-   for(int i = 0; i < 4; i++){
-      printf("Hello world\n");
-   }
+   
+   printf("starting addition...\n");
 
    int a = 1;
+   int b = 2;
+   int total = add(a , b);
+   printf("total addition is %d" , total);
 
-   
-
-   return a;
+   return 0;
 }
