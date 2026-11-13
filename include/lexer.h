@@ -26,6 +26,7 @@ typedef enum {
     TOKEN_ASSIGN,
     TOKEN_LT,
     TOKEN_INC,
+    TOKEN_COMMA,
     TOKEN_UNKNOWN,
   
     

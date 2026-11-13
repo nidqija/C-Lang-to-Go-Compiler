@@ -133,11 +133,32 @@ static void emit_node(const ASTNode *node , FILE *out){
                 fprintf(out , "\t_ = fmt.Printf\n");
                 fprintf(out , "\tos.Exit(int(cMain()))\n");
                 fprintf(out , "}\n");
+                
             } else {
-                fprintf(out, "func %.*s() int32 {\n",
-                    (int)node->func_decl.name_len , node->func_decl.name);
+                
+                // make a package main insertion to a go file if its not a main function
+                fprintf(out , "package main\n\n");
 
-                for (size_t i = 0 ; i < node->func_decl.body_count ; i++){
+                // insert a function according to the name of the parsed function according to AST Node
+                fprintf(out, "func %.*s(",
+                    (int)node->func_decl.name_len, node->func_decl.name);
+
+                // iterate all parsed function params to be written into arguments in integer 32 bit format in go code
+                for ( size_t i = 0 ; i < node->func_decl.param_count ; i++){
+                    ASTNode *param = node->func_decl.params[i];
+                    fprintf(out, "%.*s int32",
+                        (int)param->var_decl.name_len, param->var_decl.name);
+                    if (i + 1 < node->func_decl.param_count) {
+                        fprintf(out, ", ");
+                    }
+                }
+
+                // close the function as integer 32 bits
+                fprintf(out , ") int32 {\n");
+
+           
+                // iterate through all function contents ( function body ) so it will be rewritten into go code 
+                for(size_t i = 0 ; i < node->func_decl.body_count; i++){
                     emit_node(node->func_decl.body[i] , out);
                 }
 
