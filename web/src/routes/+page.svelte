@@ -2,7 +2,7 @@
 
 <script lang="ts">
 
-	import {fileStore , handleImportFiles } from "./filesHandler.svelte.ts"
+	import {fileStore , handleImportFiles, addNewFile , closeFile } from "./filesHandler.svelte.ts"
 	
 
 	// default state of code on restart
@@ -114,22 +114,48 @@
 				<span class="text-[10px] text-gray-500">Editable</span>
 			</div>
 			<!-- File Tabs Header -->
-			<div class="flex items-center gap-1 border-b border-[#333] bg-[#252526] px-2 py-1 overflow-x-auto">
-				{#each fileStore.files as file, index}
-					<button
-						onclick={() => fileStore.activeFileIndex = index}
-						class="flex items-center gap-2 rounded px-3 py-1 text-xs font-medium transition {fileStore.activeFileIndex === index ? 'bg-[#1e1e1e] text-white border-b-2 border-emerald-500' : 'text-gray-400 hover:text-gray-200'}"
-					>
-						<span>📄 {file.name}</span>
-					</button>
-				{/each}
+			<!-- File Tabs Header -->
+<div class="flex items-center gap-1 border-b border-[#333] bg-[#252526] px-2 py-1 overflow-x-auto">
+    {#each fileStore.files as file, index}
+        <div class="flex items-center rounded text-xs font-medium transition {fileStore.activeFileIndex === index ? 'bg-[#1e1e1e] text-white border-b-2 border-emerald-500' : 'bg-[#2a2a2a] text-gray-400 hover:text-gray-200'}">
+            <!-- Click tab to select file -->
+            <button
+                onclick={() => fileStore.activeFileIndex = index}
+                class="flex items-center gap-1.5 px-3 py-1.5"
+            >
+                <span>📄 {file.name}</span>
+            </button>
 
-				<!-- Hidden file input + Import Button -->
-				<label class="ml-auto flex items-center gap-1 cursor-pointer rounded bg-[#333] px-2.5 py-1 text-xs hover:bg-[#444] text-gray-300">
-					<span>📂 Import Files</span>
-					<input type="file" multiple accept=".c,.h" onchange={handleImportFiles} class="hidden" />
-				</label>
-			</div>
+            <!-- 'x' button to close file -->
+            {#if fileStore.files.length > 1}
+                <button
+                    onclick={(e) => closeFile(index, e)}
+                    class="pr-2 text-gray-500 hover:text-red-400 text-xs font-bold"
+                    title="Close file"
+                >
+                    ✕
+                </button>
+            {/if}
+        </div>
+    {/each}
+
+    <!-- [+] Add New Tab Button -->
+    <button
+        onclick={addNewFile}
+        class="flex items-center gap-1 rounded bg-[#333] px-2.5 py-1 text-xs text-gray-300 hover:bg-[#444] hover:text-white"
+        title="Add new C or Header file"
+    >
+        <span>+</span>
+        <span class="hidden sm:inline">New File</span>
+    </button>
+
+    <!-- [📂] Import Files from Computer -->
+	 
+    <label class="ml-auto flex items-center gap-1 cursor-pointer rounded bg-[#333] px-2.5 py-1 text-xs text-gray-300 hover:bg-[#444] hover:text-white">
+        <span>📂 Import</span>
+        <input type="file" multiple accept=".c,.h" onchange={handleImportFiles} class="hidden" />
+    </label>
+</div>
 
 			<!-- Active File Textarea -->
 			<textarea
