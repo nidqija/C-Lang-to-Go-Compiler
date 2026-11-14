@@ -132,6 +132,7 @@ func handleRun(w http.ResponseWriter , r *http.Request){
 	// init variables to combine AST nodes and combine go code
 	var combinedAST strings.Builder
 	var combinedGo strings.Builder
+	var goFiles []string
 
 
 	// iterate through all c files being imported and export it to list of go files back to the output folder
@@ -140,6 +141,8 @@ func handleRun(w http.ResponseWriter , r *http.Request){
 			cPath := filepath.Join(tmpDir , f.Name)
 			goName := strings.TrimSuffix(f.Name , ".c") + ".go"
 			goPath := filepath.Join(tmpDir , goName)
+
+			goFiles = append(goFiles, goName)
 
 			cmdTranspile := exec.Command(c2goBinary , "transpiler" , cPath , "-o" , goPath)
 			transpileOut , err := cmdTranspile.CombinedOutput()
@@ -184,7 +187,9 @@ func handleRun(w http.ResponseWriter , r *http.Request){
 	goCodeStr := string(goCodeBytes)*/
 
 	// run the go files to compile the go file and retrieve the output
-	cmdRun := exec.Command("go" , "run" , ".")
+	// we start by append all generated go files we have into a chain of arguments
+	runArgs := append([]string{"run"} , goFiles...)
+	cmdRun := exec.Command("go" , runArgs...)
 	cmdRun.Dir = tmpDir
 	runOut , err := cmdRun.CombinedOutput()
 	runStr := string(runOut)
