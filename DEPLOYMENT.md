@@ -12,6 +12,8 @@ This runbook contains all essential commands to monitor, track, manage, and trou
 - [5. Testing & Verification](#5-testing--verification)
 - [6. Upgrading to a Systemd Service (Auto-Start on Boot)](#6-upgrading-to-a-systemd-service-auto-start-on-boot)
 - [7. Emergency & Troubleshooting Cheat Sheet](#7-emergency--troubleshooting-cheat-sheet)
+- [8. Port Management & Killing Zombie Processes](#8-port-management--killing-zombie-processes)
+- [9. Tailscale Funnel Public Internet Access](#9-tailscale-funnel-public-internet-access)
 
 ---
 
@@ -202,4 +204,53 @@ journalctl -u c2go-deploy -f
 | **Compiler build error** | C syntax mistake in pushed commit | Run `cat ~/c2go/auto_deploy.log` to view GCC compiler error output |
 | **Permission denied on /usr/local/bin/c2go** | Missing sudo permission in script | Ensure user has sudoers permission or run with `sudo` |
 | **Log file getting too large** | Weeks of continuous logging | Truncate log with `> ~/c2go/auto_deploy.log` |
+| **Port 8080/5173 bind conflict** | Stale server instance still running | Run port-kill one-liner (Section 8 below) |
+| **Funnel connection closed** | Vite server stopped or foreground funnel exited | Start Vite on Debian & run `sudo tailscale funnel --bg 5173` |
+
+---
+
+## 8. Port Management & Killing Zombie Processes
+
+When restarting the Go API server (:8080) or Svelte Vite frontend (:5173), a previous background process may still hold the socket, resulting in `bind: Only one usage of each socket address is normally permitted`.
+
+### Windows (PowerShell) One-Liners
+Forcefully kill whatever process is holding the target port:
+
+```powershell
+# Kill zombie process on port 8080 (Go API Server):
+Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+
+# Kill zombie process on port 5173 (Vite Frontend):
+Get-NetTCPConnection -LocalPort 5173 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+```
+
+### Linux / Debian (Bash) One-Liners
+```bash
+# Kill zombie process on port 8080:
+sudo fuser -k 8080/tcp
+
+# Kill zombie process on port 5173:
+sudo fuser -k 5173/tcp
+
+# Alternative using lsof:
+sudo kill -9 $(sudo lsof -t -i:8080) 2>/dev/null
+```
+
+---
+
+## 9. Tailscale Funnel Public Internet Access
+
+Expose your local self-hosted C2Go Playground to the public internet with a free, valid HTTPS certificate:
+
+```bash
+# 1. Enable background Funnel for the Svelte frontend:
+sudo tailscale funnel --bg 5173
+
+# 2. Check live status and public URL:
+tailscale funnel status
+
+# 3. Disable / Stop public Funnel:
+sudo tailscale funnel --bg 5173 off
+```
+*(Ensure `allowedHosts: true` is configured in `web/vite.config.ts` so Vite accepts traffic from `.ts.net`).*
 
