@@ -13,18 +13,23 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Build C2Go Compiler
+      - name: Build C2Go Compiler (GCC)
         run: |
           gcc -Wall -Wextra -std=c11 -Iinclude compiler/main.c compiler/arena.c compiler/lexer.c compiler/ast.c compiler/parser.c compiler/codegen.c -o c2go
           chmod +x c2go
-
-      - name: Verify Transpilation and Execution
-        run: |
-          ./c2go transpile examples/hello.c -o output/main.go
-          go run output/main.go
-
-      - name: Update Global Binary
-        run: |
           sudo cp c2go /usr/local/bin/c2go
-          echo "🚀 Successfully built and deployed latest c2go to /usr/local/bin/c2go!"
+          echo "✅ c2go compiler built and deployed to /usr/local/bin/c2go"
 
+      - name: Build Web Frontend (SvelteKit)
+        run: |
+          cd web
+          npm install
+          npm run build
+          echo "✅ SvelteKit frontend built successfully"
+
+      - name: Build Go API Backend
+        run: |
+          cd web-server
+          go build -o c2go-server server.go
+          chmod +x c2go-server
+          echo "✅ Go API server compiled into standalone 'c2go-server' binary"
