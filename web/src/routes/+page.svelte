@@ -31,11 +31,11 @@
 	// preset code templates according to types
     function loadPreset(type: string) {
         if (type == "loop") {
-            cCode = `int main() {\n    for (int i = 0; i < 4; i++) {\n        printf("Iteration %d\\n", i);\n    }\n    return 0;\n}`;
+            fileStore.files[fileStore.activeFileIndex].content = `int main() {\n    for (int i = 0; i < 4; i++) {\n        printf("Iteration %d\\n", i);\n    }\n    return 0;\n}`;
         } else if (type == "math") {
-            cCode = `int main() {\n    return 50 - 10 / 2 + 3 * 4;\n}`;
+            fileStore.files[fileStore.activeFileIndex].content = `int main() {\n    return 50 - 10 / 2 + 3 * 4;\n}`;
         } else if (type == "hello") {
-            cCode = `int main() {\n    printf("Hello World!\\n");\n    return 0;\n}`;
+            fileStore.files[fileStore.activeFileIndex].content = `int main() {\n    printf("Hello World!\\n");\n    return 0;\n}`;
         }
     }
 
@@ -49,7 +49,7 @@
             const res = await fetch("/api/run", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ code: cCode })
+                body: JSON.stringify({ files: fileStore.files })
             });
 
 			// awaiting data being retrieved from response in json format
@@ -137,12 +137,7 @@
 				class="flex-1 resize-none bg-[#1e1e1e] p-3 font-mono text-sm text-gray-100 outline-none"
 				spellcheck="false"
 			></textarea>
-			<textarea
-				bind:value={cCode}
-				class="flex-1 resize-none bg-[#1e1e1e] p-3 font-mono text-base md:text-sm leading-relaxed text-gray-100 outline-none"
-				spellcheck="false"
-				placeholder="Write your C code here..."
-			></textarea>
+			
 		</div>
 
 		<!-- Right / Bottom: Output Tabs -->

@@ -14,9 +14,18 @@ import (
 )
 
 
+// create a struct for handling source files and its contents
+type SourceFiles struct {
+	Name string `json:"name"`
+	Content string `json:"content"`
+}
+
+
 // define struct for getting code requests
 type RunRequest struct {
-	Code string `json:"code"`
+	Code string `json:"code,omitempty"`
+	Files []SourceFiles `json:"files,omitempty"`
+
 }
 
 // define struct for getting code response compilation
@@ -69,16 +78,44 @@ func handleRun(w http.ResponseWriter , r *http.Request){
 		return
 	}
 
-
+	// init dir to store output files in go code
 	tmpDir := "../output"
-	cFilePath := filepath.Join(tmpDir , "c2go_play.c")
+	/*cFilePath := filepath.Join(tmpDir , "c2go_play.c")
 	goFilePath := filepath.Join(tmpDir , "main.go")
 	
 	_ = os.MkdirAll(tmpDir, 0755)
 	if err := os.WriteFile(cFilePath , []byte(req.Code) , 0644); err != nil {
 		jsonResponse(w , RunResponse{ Error :"Failed to write C file: " + err.Error()})
 		return
+	}*/
+
+	// init variable to wipe the content of output folder
+	_ = os.RemoveAll(tmpDir)
+
+	// init variable to create the output folder in the current parent directory if its empty
+	_ = os.Mkdir(tmpDir , 0755)
+
+
+	// accept files as a files request from api 
+	files:= req.Files
+
+	//
+	if len(files) == 0 && req.Code != "" {
+		files = []SourceFiles{{Name: "main.c" , Content: req.Code}}
 	}
+
+
+	// iterate through all c files and write them to output folder
+	for _, f := range files {
+		filePath := filepath.Join(tmpDir, f.Name)
+
+		if err := os.WriteFile(filePath , []byte(f.Content) , 0644); err != nil {
+			jsonResponse(w , RunResponse{Error:"Failed to write file " + f.Name + ": " + err.Error()})
+			return
+		}
+	}
+
+
 
 
 	c2goBinary := "c2go"
@@ -92,9 +129,44 @@ func handleRun(w http.ResponseWriter , r *http.Request){
 	}
 
 
-	cmdTranspile := exec.Command(c2goBinary , "transpiler" , cFilePath , "-o" , goFilePath )
-	transpileOut , err := cmdTranspile.CombinedOutput()
-	transpileStr := string(transpileOut)
+	// init variables to combine AST nodes and combine go code
+	var combinedAST strings.Builder
+	var combinedGo strings.Builder
+
+
+	// iterate through all c files being imported and export it to list of go files back to the output folder
+	for _ , f := range files {
+		if strings.HasSuffix(f.Name , ".c"){
+			cPath := filepath.Join(tmpDir , f.Name)
+			goName := strings.TrimSuffix(f.Name , ".c") + ".go"
+			goPath := filepath.Join(tmpDir , goName)
+
+			cmdTranspile := exec.Command(c2goBinary , "transpiler" , cPath , "-o" , goPath)
+			transpileOut , err := cmdTranspile.CombinedOutput()
+			transpileStr := string(transpileOut)
+
+			// if an error occurs , output the error message in json response
+			if err != nil {
+				jsonResponse(w , RunResponse{
+					AST : extractAST(transpileStr),
+					Output : transpileStr,
+					ExitCode: 1,
+					Error : "Transpilation Failed",
+				})
+
+				return
+			}
+		
+			combinedAST.WriteString(fmt.Sprintf("=== AST for %s ===\n%s\n\n", f.Name, extractAST(transpileStr)))
+			goBytes , _ := os.ReadFile(goPath)
+
+			combinedGo.WriteString(fmt.Sprintf("// --- %s ---\n%s\n\n", goName, string(goBytes)))
+		}
+	}
+
+
+	/*cmdTranspile := exec.Command(c2goBinary , "transpiler" , cFilePath , "-o" , goFilePath )
+	
 
 	if err != nil {
 		jsonResponse(w , RunResponse{
@@ -109,9 +181,11 @@ func handleRun(w http.ResponseWriter , r *http.Request){
 
 
 	goCodeBytes, _ := os.ReadFile(goFilePath)
-	goCodeStr := string(goCodeBytes)
+	goCodeStr := string(goCodeBytes)*/
 
-	cmdRun := exec.Command("go" , "run" , goFilePath)
+	// run the go files to compile the go file and retrieve the output
+	cmdRun := exec.Command("go" , "run" , ".")
+	cmdRun.Dir = tmpDir
 	runOut , err := cmdRun.CombinedOutput()
 	runStr := string(runOut)
 
@@ -124,9 +198,10 @@ func handleRun(w http.ResponseWriter , r *http.Request){
 		}
 	}
 
+	// return json response for successful ast generation , generated go code , and successfully generated output
 	jsonResponse( w , RunResponse{
-		AST:      extractAST(transpileStr),
-		GoCode:   goCodeStr,
+		AST:      combinedAST.String(),
+		GoCode:  combinedGo.String(),
 		Output:   runStr,
 		ExitCode: exitCode,
 	})
