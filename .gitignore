@@ -23,4 +23,5 @@ web/.svelte-kit/
 web/build/
 web/.env*
 !web/.env.example
-
+logs/
+*.log
