@@ -169,6 +169,25 @@ static void emit_node(const ASTNode *node , FILE *out){
             
         }
 
+
+        // check if the generated nodes has WHILE statements
+        case NODE_WHILE_STMT:
+
+            // if so , add a for keyword to the code gen in go code
+            fprintf(out , "\tfor ");
+            if(node->while_stmt.cond){
+                emit_node(node->while_stmt.cond , out);
+            }
+
+            // if the node being received has a lbraces , output the left brace and iterate throught the whole body
+            // emit each nodes into go code from the body that is being parsed from the WHILE node
+            fprintf(out , " {\n");
+            for(size_t i = 0 ; i < node->while_stmt.body_count ; i++){
+                emit_node(node->while_stmt.body[i] , out);
+            }
+            fprintf(out , "\t}\n");
+            break;
+
         // if node received is a binary expression , 
         // we will generate the expressions in go code by checking the 
         // left side of the nodes ,

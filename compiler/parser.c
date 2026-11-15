@@ -300,6 +300,75 @@ static ASTNode *parse_statement(Parser *parser){
         
     }
 
+    
+    // check if the current token type that is being parsed is a while token
+    if(parser->current.tokenType == TOKEN_WHILE_KW){
+
+        // advance to the next token after while 
+        advance_token(parser);
+        
+        // expect the parser to send us a L parent after while keyword
+        // if not , send an exception
+        expect(parser , TOKEN_LPAREN , "Expected '(' after 'while'");
+
+        // parse the condition in the while statement to the parser
+        // since it is an expression (etc i < 10 ) , we will parse expression
+        ASTNode *cond = parse_expression(parser);
+
+        // expect the parser to send us a R parent
+        expect(parser, TOKEN_RPAREN , "Expected ')' after 'while'");
+
+
+        expect(parser , TOKEN_LBRACE , "Expected '{' after while clauses");
+
+        // init the capacity required to allocate memory to generate the nodes for go code creation soon
+        size_t capacity = 4;
+        size_t count = 0;
+
+        // allocate the memory using arena allocator
+        ASTNode **body = (ASTNode **)arena_alloc(parser->arena, sizeof(ASTNode *) * capacity);
+
+
+        // iterate through the while statement body , make a deep copy 
+        // the deep copy will turned into nodes to be made as go code 
+        while(parser->current.tokenType != TOKEN_RBRACE && parser->current.tokenType != TOKEN_EOF){
+            if (count >= capacity){
+                size_t new_capacity = capacity * 2;
+
+                ASTNode **new_body = (ASTNode **) arena_alloc(parser->arena , sizeof(ASTNode *) * new_capacity);
+
+
+                for (size_t i = 0 ; i < count ; i++){
+                    new_body[i] = body[i];
+                }
+
+                 body = new_body;
+                capacity = new_capacity;
+
+            }
+
+                body[count++] = parse_statement(parser);
+
+        }  
+        
+        // expect a closing bracket after iterating the whole while loop body
+        expect(parser , TOKEN_RBRACE , "Expected '}' before closing while loop");
+
+        // allocate memory in arena to generate the nodes
+        ASTNode *node = (ASTNode *)arena_alloc(parser->arena , sizeof(ASTNode));
+
+        // assign the nodes to be sent to codegen for go code creation
+        node->kind = NODE_WHILE_STMT;
+        node->while_stmt.cond = cond;
+        node->while_stmt.body = body;
+        node->while_stmt.body_count = count;
+
+        // return the generated node to another function to be called
+        return node;
+
+    
+    }
+
     ASTNode *expr = parse_expression(parser);
     expect(parser, TOKEN_SEMICOLON , "Expected ';' after statement");
     ASTNode *stmt = (ASTNode *)arena_alloc(parser->arena, sizeof(ASTNode));

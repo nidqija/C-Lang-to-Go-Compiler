@@ -19,7 +19,8 @@ typedef enum {
     NODE_FOR_STMT,
     NODE_VAR_DECL,
     NODE_VAR_REF,
-    NODE_INC_EXPR
+    NODE_INC_EXPR,
+    NODE_WHILE_STMT
 } NodeKind;
 
 
@@ -59,6 +60,14 @@ struct ASTNode{
             ASTNode **body;
             size_t body_count;
         } for_stmt;
+
+
+        struct {
+            ASTNode *init;
+            ASTNode *cond;
+            ASTNode **body;
+            size_t body_count;
+        } while_stmt;
 
         struct{
             const char *name;
