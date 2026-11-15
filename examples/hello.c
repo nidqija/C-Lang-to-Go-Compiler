@@ -3,12 +3,13 @@
 
 int main() {
    
-   printf("starting addition...\n");
+   
+   int i = 0;
 
-   int a = 1;
-   int b = 2;
-   int total = add(a , b);
-   printf("total addition is %d" , total);
+   while(i < 10){
+      printf("Hello world\n");
+      i++;
+   }
 
    return 0;
 }
