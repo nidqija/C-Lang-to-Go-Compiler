@@ -209,6 +209,10 @@ Token lexer_next(Lexer *lexer){
             return make_token(lexer ,TOKEN_FOR_KW , start_offset ,start_line , start_col);
         }
 
+        if(length == 5 && strncmp(identifier , "while" , 5) == 0){
+            return make_token(lexer , TOKEN_WHILE_KW , start_offset , start_line , start_col);
+        }
+
         // if the length of the identifier is 4 and the identifier is "void", return a token of type TOKEN_VOID_KW
         if(length == 4 && strncmp(identifier, "void" , 4) == 0){
             return make_token(lexer , TOKEN_VOID_KW , start_offset , start_line , start_col);
@@ -297,6 +301,9 @@ Token lexer_next(Lexer *lexer){
 
             case TOKEN_COMMA:
                 return "COMMA(,)";
+
+            case TOKEN_WHILE_KW:
+                return "KEYWORD(while)";
             
             default:
                 return "UNKNOWN";

@@ -28,6 +28,7 @@ typedef enum {
     TOKEN_INC,
     TOKEN_COMMA,
     TOKEN_UNKNOWN,
+    TOKEN_WHILE_KW
   
     
 } TokenType;
