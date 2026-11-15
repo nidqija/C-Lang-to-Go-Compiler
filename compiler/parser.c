@@ -300,6 +300,14 @@ static ASTNode *parse_statement(Parser *parser){
         
     }
 
+    // WORK in progress
+    if(parser->current.tokenType == TOKEN_WHILE_KW){
+        advance_token(parser);
+        //pass
+
+
+    }
+
     ASTNode *expr = parse_expression(parser);
     expect(parser, TOKEN_SEMICOLON , "Expected ';' after statement");
     ASTNode *stmt = (ASTNode *)arena_alloc(parser->arena, sizeof(ASTNode));
